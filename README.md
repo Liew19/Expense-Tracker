@@ -8,18 +8,30 @@ Full-stack expense management app. JWT auth, CRUD, filters, pagination, i18n.
 
 ## Setup
 
+Requires Node 18+ and MySQL running locally.
+
 ```bash
+# 1. Create database
 mysql -u root -p -e "CREATE DATABASE expense_tracker"
 
-cd server && npm install && cp .env.example .env
-mysql -u root -p expense_tracker < server/database.sql
-npm run dev
+# 2. Server
+cd server
+npm install
+copy .env.example .env       # Windows
+# cp .env.example .env       # Linux/Mac
+mysql -u root -p expense_tracker < database.sql
+npm run seed                 # adds test user + sample data
+npm run dev                  # Terminal 1 → localhost:5000
 
-cd client && npm install
-npm run dev
+# 3. Client (new terminal)
+cd client
+npm install
+npm run dev                  # Terminal 2 → localhost:5173
 ```
 
-Open `localhost:5173`, register, go.
+Open `localhost:5173`.
+
+**Test login**: `test@accordia.com` / `accordia123`
 
 ---
 
