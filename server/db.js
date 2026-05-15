@@ -22,7 +22,7 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
-// Auto-create tables on startup
+// Auto-create tables on startup (local dev only, skip on Vercel)
 async function initTables() {
   try {
     const connection = await pool.promise().getConnection();
@@ -57,6 +57,10 @@ async function initTables() {
   }
 }
 
-initTables();
+// Local dev: auto-create tables.
+// Vercel: tables must exist in your remote DB — set env vars in Vercel dashboard.
+if (!process.env.VERCEL) {
+  initTables();
+}
 
 module.exports = pool.promise();
