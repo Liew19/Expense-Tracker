@@ -1,0 +1,45 @@
+services:
+  # Backend API
+  - type: web
+    name: expense-tracker-api
+    env: node
+    region: singapore
+    repo: https://github.com/Liew19/Expense-Tracker.git
+    branch: main
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 18
+      - key: DB_HOST
+        value: gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com
+      - key: DB_PORT
+        value: "4000"
+      - key: DB_USER
+        value: 2MuKVrMQ5hCAwse.root
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        value: sys
+      - key: DB_SSL
+        value: "true"
+      - key: JWT_SECRET
+        generateValue: true
+
+  # Frontend
+  - type: web
+    name: expense-tracker-client
+    env: static
+    region: singapore
+    repo: https://github.com/Liew19/Expense-Tracker.git
+    branch: main
+    rootDir: client
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          name: expense-tracker-api
+          type: web
+          property: host
