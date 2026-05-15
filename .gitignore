@@ -4,3 +4,4 @@ dist/
 *.log
 *.pem
 .DS_Store
+.playwright-mcp/
