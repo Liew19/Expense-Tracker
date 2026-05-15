@@ -1,0 +1,12 @@
+{
+  "name": "expense-tracker",
+  "private": true,
+  "dependencies": {
+    "express": "^5.2.1",
+    "cors": "^2.8.6",
+    "mysql2": "^3.22.3",
+    "bcryptjs": "^3.0.3",
+    "jsonwebtoken": "^9.0.3",
+    "dotenv": "^17.4.2"
+  }
+}
