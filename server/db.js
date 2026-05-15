@@ -7,8 +7,8 @@ const sslConfig = (() => {
   if (process.env.DB_CA_PATH) {
     return { ca: fs.readFileSync(process.env.DB_CA_PATH) };
   }
-  // Use system CA bundle (works for TiDB Cloud)
-  return {};
+  // TiDB Cloud requires TLS 1.2+ with server cert verification
+  return { rejectUnauthorized: true, minVersion: "TLSv1.2" };
 })();
 
 const pool = mysql.createPool({
