@@ -45,7 +45,6 @@ const AddExpense = () => {
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(expenseSchema),
@@ -119,7 +118,6 @@ const AddExpense = () => {
               <div className="space-y-2">
                 <Label>{t("addExpense.typeLabel")}</Label>
                 <Select
-                  value={watch("type")}
                   onValueChange={(value) => setValue("type", value, { shouldValidate: true })}
                 >
                   <SelectTrigger>
@@ -138,7 +136,6 @@ const AddExpense = () => {
               <div className="space-y-2">
                 <Label>{t("addExpense.categoryLabel")}</Label>
                 <Select
-                  value={watch("category")}
                   onValueChange={(value) => setValue("category", value)}
                 >
                   <SelectTrigger>
