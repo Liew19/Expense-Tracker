@@ -25,6 +25,23 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "OK" });
 });
 
+// Debug: check database tables
+app.get("/api/db-check", async (req, res) => {
+  try {
+    const db = require("./db");
+    const [tables] = await db.query("SHOW TABLES");
+    const tableNames = tables.map((t) => Object.values(t)[0]);
+    const info = {};
+    for (const name of tableNames) {
+      const [create] = await db.query(`SHOW CREATE TABLE ${name}`);
+      info[name] = create[0]["Create Table"];
+    }
+    res.json({ connected: true, tables: tableNames, info });
+  } catch (err) {
+    res.json({ connected: false, error: err.message, code: err.code });
+  }
+});
+
 // Local dev: listen. Vercel: export the app.
 if (require.main === module) {
   const PORT = process.env.PORT || 5000;
