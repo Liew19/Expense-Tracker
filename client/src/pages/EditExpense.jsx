@@ -66,7 +66,7 @@ const EditExpense = () => {
             amount: String(expense.amount),
             type: expense.type,
             category: expense.category || "",
-            date: expense.date,
+            date: expense.date ? new Date(expense.date).toISOString().split("T")[0] : "",
             note: expense.note || "",
           }}
           onSubmit={(data) => mutation.mutate(data)}

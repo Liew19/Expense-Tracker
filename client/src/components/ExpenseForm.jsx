@@ -40,6 +40,7 @@ export default function ExpenseForm({
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(expenseSchema),
@@ -90,6 +91,7 @@ export default function ExpenseForm({
           <div className="space-y-2">
             <Label>{t("addExpense.typeLabel")}</Label>
             <Select
+              value={watch("type")}
               onValueChange={(value) =>
                 setValue("type", value, { shouldValidate: true })
               }
@@ -111,6 +113,7 @@ export default function ExpenseForm({
           <div className="space-y-2">
             <Label>{t("addExpense.categoryLabel")}</Label>
             <Select
+              value={watch("category") || ""}
               onValueChange={(value) => setValue("category", value)}
             >
               <SelectTrigger>
