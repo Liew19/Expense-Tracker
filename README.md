@@ -60,34 +60,8 @@ cp .env.example .env
 ```
 
 ```bash
-# 3. Set up database tables
-mysql -u root -p expense_tracker
-```
-
-Paste the following SQL:
-
-```sql
-CREATE TABLE users (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  username VARCHAR(255) NOT NULL,
-  email VARCHAR(255) NOT NULL UNIQUE,
-  password VARCHAR(255) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE expenses (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  user_id INT NOT NULL,
-  title VARCHAR(255) NOT NULL,
-  amount DECIMAL(12,2) NOT NULL,
-  type ENUM('income', 'expense') NOT NULL,
-  category VARCHAR(100),
-  date DATE NOT NULL,
-  note TEXT,
-  is_deleted TINYINT(1) DEFAULT 0,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
+# 3. Set up database tables (schema provided in server/database.sql)
+mysql -u root -p < server/database.sql
 ```
 
 ```bash
