@@ -55,12 +55,12 @@ const ExpenseController = {
       }
 
       const data = {
-        title: req.body.title || existing[0].title,
-        amount: req.body.amount || existing[0].amount,
-        type: req.body.type || existing[0].type,
+        title: req.body.title ?? existing[0].title,
+        amount: req.body.amount ?? existing[0].amount,
+        type: req.body.type ?? existing[0].type,
         category: req.body.category ?? existing[0].category,
-        date: req.body.date || existing[0].date,
-        note: req.body.note !== undefined ? req.body.note : existing[0].note,
+        date: req.body.date ?? existing[0].date,
+        note: req.body.note ?? existing[0].note,
       };
 
       await ExpenseModel.update(req.params.id, req.user.id, data);

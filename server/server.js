@@ -4,6 +4,7 @@ require("dotenv").config();
 
 const authRoutes = require("./routes/auth");
 const expenseRoutes = require("./routes/expenses");
+const seedRoutes = require("./routes/seed");
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/expenses", expenseRoutes);
+app.use("/api/seed", seedRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK" });

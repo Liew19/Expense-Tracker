@@ -43,7 +43,7 @@ const deleteExpense = async (id) => {
 };
 
 const seedData = async () => {
-  const res = await api.get("/expenses/seed");
+  const res = await api.post("/seed");
   return res.data;
 };
 
