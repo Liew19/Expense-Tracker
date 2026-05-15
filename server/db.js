@@ -7,7 +7,6 @@ const sslConfig = (() => {
   if (process.env.DB_CA_PATH) {
     return { ca: fs.readFileSync(process.env.DB_CA_PATH) };
   }
-  // TiDB Cloud requires TLS 1.2+ with server cert verification
   return { rejectUnauthorized: true, minVersion: "TLSv1.2" };
 })();
 
@@ -22,5 +21,42 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0,
 });
+
+// Auto-create tables on startup
+async function initTables() {
+  try {
+    const connection = await pool.promise().getConnection();
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(100) NOT NULL,
+        email VARCHAR(150) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS expenses (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        title VARCHAR(200) NOT NULL,
+        amount DECIMAL(10, 2) NOT NULL,
+        type ENUM('income', 'expense') NOT NULL,
+        category VARCHAR(100),
+        date DATE NOT NULL,
+        note TEXT,
+        is_deleted TINYINT(1) DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `);
+    connection.release();
+    console.log("✓ Database tables ready");
+  } catch (err) {
+    console.error("✗ Failed to create tables:", err.message);
+  }
+}
+
+initTables();
 
 module.exports = pool.promise();
