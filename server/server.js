@@ -11,6 +11,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Don't let Vercel CDN cache API responses (they return 304)
+app.use((req, res, next) => {
+  res.set("Cache-Control", "no-store, must-revalidate");
+  next();
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/seed", seedRoutes);
