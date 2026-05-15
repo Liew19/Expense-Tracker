@@ -33,8 +33,13 @@ import {
 import api from "@/lib/api";
 import { useI18n } from "@/lib/I18nProvider";
 
-const fetchExpenses = async () => {
-  const res = await api.get("/expenses");
+const fetchExpenses = async ({ queryKey }) => {
+  const [, page, type, month, date] = queryKey;
+  const params = { page, limit: ITEMS_PER_PAGE };
+  if (type !== "all") params.type = type;
+  if (month !== "all") params.month = month;
+  if (date) params.date = format(date, "yyyy-MM-dd");
+  const res = await api.get("/expenses", { params });
   return res.data;
 };
 
@@ -63,13 +68,24 @@ const Home = () => {
   }, [filterType, filterMonth, filterDate]);
 
   const {
-    data: expenses = [],
+    data: resp,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["expenses"],
+    queryKey: ["expenses", currentPage, filterType, filterMonth, filterDate],
     queryFn: fetchExpenses,
   });
+
+  const expenses = resp?.data ?? [];
+  const totalPages = resp?.totalPages ?? 1;
+  const totalIncome = resp?.totalIncome ?? 0;
+  const totalExpense = resp?.totalExpense ?? 0;
+  const balance = totalIncome - totalExpense;
+  const datesWithRecords = (resp?.datesWithRecords ?? []).map((s) => {
+    const [y, m, d] = s.split("-").map(Number);
+    return new Date(y, m - 1, d);
+  });
+  const months = resp?.months ?? [];
 
   const deleteMutation = useMutation({
     mutationFn: deleteExpense,
@@ -105,50 +121,6 @@ const Home = () => {
       setFilterDate(date);
     }
   };
-
-  // Get unique dates that have records (for calendar dots)
-  const datesWithRecords = (() => {
-    const dateStrings = [...new Set(expenses.map((e) => e.date.split("T")[0]))];
-    return dateStrings.map((s) => {
-      const [y, m, d] = s.split("-").map(Number);
-      return new Date(y, m - 1, d);
-    });
-  })();
-
-  // Filter expenses
-  const filteredExpenses = expenses.filter((e) => {
-    if (filterType !== "all" && e.type !== filterType) return false;
-    if (filterMonth !== "all") {
-      const expenseMonth = e.date.substring(0, 7);
-      if (expenseMonth !== filterMonth) return false;
-    }
-    if (filterDate && e.date.split("T")[0] !== format(filterDate, "yyyy-MM-dd")) return false;
-    return true;
-  });
-
-  // Summary cards reflect filtered data
-  const totalIncome = filteredExpenses
-    .filter((e) => e.type === "income")
-    .reduce((sum, e) => sum + Number(e.amount), 0);
-
-  const totalExpense = filteredExpenses
-    .filter((e) => e.type === "expense")
-    .reduce((sum, e) => sum + Number(e.amount), 0);
-
-  const balance = totalIncome - totalExpense;
-
-  // Pagination
-  const totalPages = Math.max(1, Math.ceil(filteredExpenses.length / ITEMS_PER_PAGE));
-  const safePage = Math.min(currentPage, totalPages);
-  const paginatedExpenses = filteredExpenses.slice(
-    (safePage - 1) * ITEMS_PER_PAGE,
-    safePage * ITEMS_PER_PAGE,
-  );
-
-  // Get unique months for filter
-  const months = [
-    ...new Set(expenses.map((e) => e.date.substring(0, 7))),
-  ].sort();
 
   if (isError) {
     return (
@@ -265,7 +237,7 @@ const Home = () => {
           <div className="text-center py-12 text-muted-foreground">
             {t("home.loading")}
           </div>
-        ) : filteredExpenses.length === 0 ? (
+        ) : expenses.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-muted-foreground mb-4">{t("home.noRecords")}</div>
             <Button variant="outline" onClick={() => seedMutation.mutate()} disabled={seedMutation.isPending}>
@@ -288,7 +260,7 @@ const Home = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedExpenses.map((expense) => (
+                  {expenses.map((expense) => (
                     <TableRow key={expense.id} className="group">
                       <TableCell className="font-medium">{expense.title}</TableCell>
                       <TableCell>
@@ -343,7 +315,7 @@ const Home = () => {
 
             {/* Mobile Cards */}
             <div className="md:hidden space-y-3">
-              {paginatedExpenses.map((expense) => (
+              {expenses.map((expense) => (
                 <div
                   key={expense.id}
                   className="rounded-lg border bg-card p-4 space-y-3"
@@ -396,14 +368,14 @@ const Home = () => {
             {totalPages > 1 && (
               <div className="flex items-center justify-between mt-6">
                 <p className="text-sm text-muted-foreground">
-                  {(safePage - 1) * ITEMS_PER_PAGE + 1}-
-                  {Math.min(safePage * ITEMS_PER_PAGE, filteredExpenses.length)} / {filteredExpenses.length}
+                  {(currentPage - 1) * ITEMS_PER_PAGE + 1}-
+                  {Math.min(currentPage * ITEMS_PER_PAGE, resp?.total ?? 0)} / {resp?.total ?? 0}
                 </p>
                 <div className="flex items-center gap-1">
                   <Button
                     variant="outline"
                     size="sm"
-                    disabled={safePage <= 1}
+                    disabled={currentPage <= 1}
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   >
                     ‹ Prev
@@ -412,7 +384,7 @@ const Home = () => {
                     .filter((page) => {
                       if (totalPages <= 7) return true;
                       if (page === 1 || page === totalPages) return true;
-                      if (Math.abs(page - safePage) <= 1) return true;
+                      if (Math.abs(page - currentPage) <= 1) return true;
                       return false;
                     })
                     .map((page, idx, arr) => (
@@ -421,7 +393,7 @@ const Home = () => {
                           <span className="px-1 text-muted-foreground">...</span>
                         )}
                         <Button
-                          variant={page === safePage ? "default" : "outline"}
+                          variant={page === currentPage ? "default" : "outline"}
                           size="sm"
                           className="min-w-[36px]"
                           onClick={() => setCurrentPage(page)}
@@ -433,7 +405,7 @@ const Home = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    disabled={safePage >= totalPages}
+                    disabled={currentPage >= totalPages}
                     onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   >
                     Next ›

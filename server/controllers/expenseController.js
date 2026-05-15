@@ -3,8 +3,32 @@ const ExpenseModel = require("../models/expenseModel");
 const ExpenseController = {
   async getAll(req, res) {
     try {
-      const [rows] = await ExpenseModel.findAllByUser(req.user.id);
-      res.json(rows);
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const { type, month, date } = req.query;
+      const filters = { page, limit, type, month, date };
+
+      const [summary, datesWithRecords, months] = await Promise.all([
+        ExpenseModel.getSummary(req.user.id, filters),
+        ExpenseModel.getDatesWithRecords(req.user.id),
+        ExpenseModel.getAvailableMonths(req.user.id),
+      ]);
+
+      const { rows, total } = await ExpenseModel.findAllByUser(
+        req.user.id,
+        filters,
+      );
+
+      res.json({
+        data: rows,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit) || 1,
+        totalIncome: summary.totalIncome,
+        totalExpense: summary.totalExpense,
+        datesWithRecords,
+        months,
+      });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Server error" });

@@ -26,9 +26,9 @@ const sampleData = [
 async function seed(req, res) {
   try {
     // Check if already seeded
-    const [existing] = await ExpenseModel.findAllByUser(req.user.id);
-    if (existing.length > 0) {
-      return res.json({ message: "Already have data, no seed needed", count: existing.length });
+    const { rows } = await ExpenseModel.findAllByUser(req.user.id);
+    if (rows.length > 0) {
+      return res.json({ message: "Already have data, no seed needed", count: rows.length });
     }
 
     let count = 0;
