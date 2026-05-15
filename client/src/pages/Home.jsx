@@ -42,6 +42,11 @@ const deleteExpense = async (id) => {
   await api.delete(`/expenses/${id}`);
 };
 
+const seedData = async () => {
+  const res = await api.get("/expenses/seed");
+  return res.data;
+};
+
 const Home = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -80,6 +85,17 @@ const Home = () => {
   const handleDelete = (id) => {
     deleteMutation.mutate(id);
   };
+
+  const seedMutation = useMutation({
+    mutationFn: seedData,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      toast.success(`Added ${data.count} sample records`);
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || "Seed failed");
+    },
+  });
 
   const handleDateSelect = (date) => {
     // Toggle: clicking the same date deselects it
@@ -234,7 +250,14 @@ const Home = () => {
             </Select>
           </div>
 
-          <Button onClick={() => navigate("/add")}>{t("home.addNew")}</Button>
+          <div className="flex gap-2">
+            {expenses.length === 0 && (
+              <Button variant="outline" onClick={() => seedMutation.mutate()} disabled={seedMutation.isPending}>
+                {seedMutation.isPending ? "Seeding..." : "Load Sample Data"}
+              </Button>
+            )}
+            <Button onClick={() => navigate("/add")}>{t("home.addNew")}</Button>
+          </div>
         </div>
 
         {/* Loading State */}
@@ -243,8 +266,11 @@ const Home = () => {
             {t("home.loading")}
           </div>
         ) : filteredExpenses.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">
-            {t("home.noRecords")}
+          <div className="text-center py-12">
+            <div className="text-muted-foreground mb-4">{t("home.noRecords")}</div>
+            <Button variant="outline" onClick={() => seedMutation.mutate()} disabled={seedMutation.isPending}>
+              {seedMutation.isPending ? "Seeding..." : "Load Sample Data"}
+            </Button>
           </div>
         ) : (
           <>
