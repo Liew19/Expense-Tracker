@@ -7,7 +7,6 @@
       "includeFiles": "server/**"
     }
   },
-  "nodeVersion": "20.x",
   "routes": [
     { "src": "/api/(.*)", "dest": "api/index.js" },
     { "handle": "filesystem" },
