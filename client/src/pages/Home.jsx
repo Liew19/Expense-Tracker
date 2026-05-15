@@ -33,6 +33,8 @@ import {
 import api from "@/lib/api";
 import { useI18n } from "@/lib/I18nProvider";
 
+const ITEMS_PER_PAGE = 10;
+
 const fetchExpenses = async ({ queryKey }) => {
   const [, page, type, month, date] = queryKey;
   const params = { page, limit: ITEMS_PER_PAGE };
@@ -60,7 +62,6 @@ const Home = () => {
   const [filterMonth, setFilterMonth] = useState("all");
   const [filterDate, setFilterDate] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 10;
 
   // Reset to page 1 when filters change
   useEffect(() => {
