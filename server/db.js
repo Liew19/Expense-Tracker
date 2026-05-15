@@ -7,7 +7,7 @@ const sslConfig = (() => {
   if (process.env.DB_CA_PATH) {
     return { ca: fs.readFileSync(process.env.DB_CA_PATH) };
   }
-  return { rejectUnauthorized: true, minVersion: "TLSv1.2" };
+  return { rejectUnauthorized: false, minVersion: "TLSv1.2" };
 })();
 
 const pool = mysql.createPool({
@@ -57,10 +57,7 @@ async function initTables() {
   }
 }
 
-// Local dev: auto-create tables.
-// Vercel: tables must exist in your remote DB — set env vars in Vercel dashboard.
-if (!process.env.VERCEL) {
-  initTables();
-}
+// Auto-create tables on startup (all environments)
+initTables();
 
 module.exports = pool.promise();
