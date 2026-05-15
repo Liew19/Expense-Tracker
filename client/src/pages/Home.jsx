@@ -99,17 +99,6 @@ const Home = () => {
     });
   })();
 
-  // Calculate summary
-  const totalIncome = expenses
-    .filter((e) => e.type === "income")
-    .reduce((sum, e) => sum + Number(e.amount), 0);
-
-  const totalExpense = expenses
-    .filter((e) => e.type === "expense")
-    .reduce((sum, e) => sum + Number(e.amount), 0);
-
-  const balance = totalIncome - totalExpense;
-
   // Filter expenses
   const filteredExpenses = expenses.filter((e) => {
     if (filterType !== "all" && e.type !== filterType) return false;
@@ -120,6 +109,17 @@ const Home = () => {
     if (filterDate && e.date.split("T")[0] !== format(filterDate, "yyyy-MM-dd")) return false;
     return true;
   });
+
+  // Summary cards reflect filtered data
+  const totalIncome = filteredExpenses
+    .filter((e) => e.type === "income")
+    .reduce((sum, e) => sum + Number(e.amount), 0);
+
+  const totalExpense = filteredExpenses
+    .filter((e) => e.type === "expense")
+    .reduce((sum, e) => sum + Number(e.amount), 0);
+
+  const balance = totalIncome - totalExpense;
 
   // Pagination
   const totalPages = Math.max(1, Math.ceil(filteredExpenses.length / ITEMS_PER_PAGE));
