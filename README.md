@@ -1,5 +1,8 @@
 # Expense Tracker
 
+A full-stack expense management application developed for the technical assessment.
+Built with **React 19, Node.js (Express), and MySQL**.
+
 ## Setup
 
 ```bash
