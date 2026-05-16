@@ -9,6 +9,14 @@ import SummaryCard from "@/components/SummaryCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -58,6 +66,7 @@ const Home = () => {
   const [filterMonth, setFilterMonth] = useState("all");
   const [filterDate, setFilterDate] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [deleteId, setDeleteId] = useState(null);
 
   // Reset to page 1 when filters change
   useEffect(() => {
@@ -95,9 +104,9 @@ const Home = () => {
     },
   });
 
-  const handleDelete = (id) => {
-    deleteMutation.mutate(id);
-  };
+   const handleDelete = (id) => {
+     setDeleteId(id);
+   };
 
   const handleDateSelect = (date) => {
     // Toggle: clicking the same date deselects it
@@ -303,13 +312,13 @@ const Home = () => {
                             {t("home.edit")}
                           </Button>
                           <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-destructive hover:text-destructive"
-                            onClick={() => handleDelete(expense.id)}
-                          >
-                            {t("home.delete")}
-                          </Button>
+                              variant="ghost"
+                              size="sm"
+                              className="text-destructive hover:text-destructive"
+                              onClick={() => handleDelete(expense.id)}
+                            >
+                              {t("home.delete")}
+                            </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -415,14 +424,38 @@ const Home = () => {
                   >
                     Next ›
                   </Button>
+                  </div>
                 </div>
-              </div>
-            )}
-          </>
-        )}
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+          <DialogContent className="w-[320px]">
+            <DialogHeader>
+              <DialogTitle>{t("home.deleteConfirmTitle")}</DialogTitle>
+              <DialogDescription>{t("home.deleteDescription")}</DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDeleteId(null)}>
+                {t("home.cancel")}
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  deleteMutation.mutate(deleteId);
+                  setDeleteId(null);
+                }}
+              >
+                {t("home.delete")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
 export default Home;
