@@ -1,70 +1,46 @@
 # Expense Tracker
 
-Accordia assessment — full-stack expense management app.
-
-React 19 + Express 5 + MySQL. JWT auth, CRUD, filters, pagination, i18n.
-
----
-
-## Getting Started
-
-Node 18+ and a local MySQL instance.
+## Setup
 
 ```bash
-# 1. Create database
 mysql -u root -p -e "CREATE DATABASE expense_tracker"
-
-# 2. Install dependencies (one shot — npm workspaces)
 npm install
-
-# 3. Env vars
 cp server\.env.example server\.env
-
-# 4. Start both server + client
 npm run dev
-
-# Or separately:
-npm run dev:server   # Terminal 1 → localhost:5000
-npm run dev:client   # Terminal 2 → localhost:5173
 ```
 
-Open http://localhost:5173.
+Open http://localhost:5173, register, login.
 
-**Test login**: `test@accordia.com` / `accordia123`
-
-> Tables are created automatically on first start. No manual SQL.
-> Click "Load Sample Data" on the home page to insert 20 records.
-
----
+> Tables auto-create on server start (database must exist first).
+> Manual SQL: `mysql -u root -p < server/init.sql`
 
 ## Deploy to Vercel
 
-The `api/index.js` serverless function handles API routes, `client/dist` is the static output.
+`api/index.js` → API, `client/dist` → static. Set [env vars](#environment-variables) in dashboard. Tables won't auto-create — run `init.sql` against production DB first.
 
-### Env vars to set in Vercel Dashboard:
+## Env Vars
 
-| Key | Description |
+| Key | Default |
 |---|---|
-| `DB_HOST` | Your MySQL / TiDB host |
-| `DB_USER` | Database user |
-| `DB_PASSWORD` | Database password |
-| `DB_NAME` | Database name (e.g. `expense_tracker`) |
-| `DB_PORT` | Port (default `3306`) |
-| `DB_SSL` | `true` for remote databases |
-| `JWT_SECRET` | Secret key for signing tokens |
-
----
+| `DB_HOST` | `localhost` |
+| `DB_USER` | `root` |
+| `DB_PASSWORD` | |
+| `DB_NAME` | `expense_tracker` |
+| `DB_PORT` | `3306` |
+| `DB_SSL` | `false` |
+| `JWT_SECRET` | (change in production) |
+| `PORT` | `5000` |
 
 ## API
 
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| POST | `/api/auth/register` | No | Register |
-| POST | `/api/auth/login` | No | Login, returns JWT |
-| GET | `/api/expenses` | Yes | List (paginated, filterable) |
-| GET | `/api/expenses/:id` | Yes | Get one |
-| POST | `/api/expenses` | Yes | Create |
-| PUT | `/api/expenses/:id` | Yes | Update |
-| DELETE | `/api/expenses/:id` | Yes | Soft delete |
-| POST | `/api/seed` | Yes | Insert 20 sample records |
-| GET | `/api/health` | No | Health check |
+| Method | Path | Auth |
+|---|---|---|
+| POST | `/api/auth/register` | No |
+| POST | `/api/auth/login` | No |
+| GET | `/api/expenses` | Yes |
+| GET | `/api/expenses/:id` | Yes |
+| POST | `/api/expenses` | Yes |
+| PUT | `/api/expenses/:id` | Yes |
+| DELETE | `/api/expenses/:id` | Yes |
+| GET | `/api/health` | No |
+| GET | `/api/db-check` | No |
