@@ -8,6 +8,7 @@ import Navbar from "@/components/Navbar";
 import SummaryCard from "@/components/SummaryCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -47,11 +48,6 @@ const fetchExpenses = async ({ queryKey }) => {
 
 const deleteExpense = async (id) => {
   await api.delete(`/expenses/${id}`);
-};
-
-const seedData = async () => {
-  const res = await api.post("/seed");
-  return res.data;
 };
 
 const Home = () => {
@@ -102,17 +98,6 @@ const Home = () => {
   const handleDelete = (id) => {
     deleteMutation.mutate(id);
   };
-
-  const seedMutation = useMutation({
-    mutationFn: seedData,
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["expenses"] });
-      toast.success(`Added ${data.count} sample records`);
-    },
-    onError: (err) => {
-      toast.error(err.response?.data?.message || "Seed failed");
-    },
-  });
 
   const handleDateSelect = (date) => {
     // Toggle: clicking the same date deselects it
@@ -224,26 +209,45 @@ const Home = () => {
           </div>
 
           <div className="flex gap-2">
-            {expenses.length === 0 && (
-              <Button variant="outline" onClick={() => seedMutation.mutate()} disabled={seedMutation.isPending}>
-                {seedMutation.isPending ? "Seeding..." : "Load Sample Data"}
-              </Button>
-            )}
             <Button onClick={() => navigate("/add")}>{t("home.addNew")}</Button>
           </div>
         </div>
 
         {/* Loading State */}
         {isLoading ? (
-          <div className="text-center py-12 text-muted-foreground">
-            {t("home.loading")}
+          <div className="space-y-6">
+            {/* Summary Cards Skeletons */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {[...Array(3)].map((_, i) => (
+                <Skeleton key={i} className="h-28 w-full rounded-xl" />
+              ))}
+            </div>
+            {/* Filters Skeleton */}
+            <div className="flex gap-2">
+              <Skeleton className="h-10 w-[160px] rounded-md" />
+              <Skeleton className="h-10 w-[140px] rounded-md" />
+              <Skeleton className="h-10 w-[140px] rounded-md" />
+            </div>
+            {/* Table Rows Skeleton */}
+            <div className="rounded-lg border overflow-hidden">
+              <div className="bg-muted/50 p-4">
+                <Skeleton className="h-4 w-full" />
+              </div>
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="flex items-center gap-4 p-4 border-t">
+                  <Skeleton className="h-4 w-1/4" />
+                  <Skeleton className="h-4 w-[10%]" />
+                  <Skeleton className="h-4 w-[10%]" />
+                  <Skeleton className="h-4 w-[12%]" />
+                  <Skeleton className="h-4 w-[12%]" />
+                  <Skeleton className="h-4 w-[15%] ml-auto" />
+                </div>
+              ))}
+            </div>
           </div>
         ) : expenses.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-muted-foreground mb-4">{t("home.noRecords")}</div>
-            <Button variant="outline" onClick={() => seedMutation.mutate()} disabled={seedMutation.isPending}>
-              {seedMutation.isPending ? "Seeding..." : "Load Sample Data"}
-            </Button>
+            <div className="text-muted-foreground">{t("home.noRecords")}</div>
           </div>
         ) : (
           <>

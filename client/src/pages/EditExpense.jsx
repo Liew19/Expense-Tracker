@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import ExpenseForm from "@/components/ExpenseForm";
+import { Skeleton } from "@/components/ui/skeleton";
 import api from "@/lib/api";
 import { useI18n } from "@/lib/I18nProvider";
 
@@ -37,8 +38,20 @@ const EditExpense = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="max-w-lg mx-auto px-4 py-8 text-center text-muted-foreground">
-          {t("editExpense.loading")}
+        <div className="max-w-lg mx-auto px-4 py-8 space-y-6">
+          <Skeleton className="h-8 w-48 mx-auto" />
+          <div className="space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-10 w-full rounded-md" />
+              </div>
+            ))}
+            <div className="flex gap-3 pt-2">
+              <Skeleton className="h-10 flex-1 rounded-md" />
+              <Skeleton className="h-10 flex-1 rounded-md" />
+            </div>
+          </div>
         </div>
       </div>
     );
